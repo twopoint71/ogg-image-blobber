@@ -49,9 +49,11 @@ image_height() {
   echo -n $(get_image_dimension "height")
 }
 
+# sed filter removes leading spaces
+# - this for BSD-flavors of wc which insert leading spaces
 get_image_size() {
   local FILE=${1}
-  echo -n "$(wc -c ${FILE} | cut -d ' ' -f1)"
+  echo -n "$(wc -c ${FILE} | sed 's/^[ ]*//g' | cut -d ' ' -f1)"
 }
 
 add_to_target_binary() {
@@ -83,10 +85,12 @@ add_to_target_binary "${#DESCRIPTION}"
 add_to_target_direct "${DESCRIPTION}"
 
 # Picture width <32>
-add_to_target_binary "$(image_width)"
+##add_to_target_binary "$(image_width)"
+add_to_target_binary 0
 
 # Picture height <32>
-add_to_target_binary "$(image_height)"
+##add_to_target_binary "$(image_height)"
+add_to_target_binary 0
 
 # Picture color depth <32> (probably should figure this out, but seems to be okay at 0)
 add_to_target_binary 0
@@ -101,7 +105,13 @@ add_to_target_binary "$(get_image_size ${IMAGE_SOURCE})"
 cat "${IMAGE_SOURCE}" >> "${TARGET}.tmp"
 
 # Output to base64
-base64 --wrap=0 "${TARGET}.tmp" > "${TARGET}.base64"
+if [ "$(uname)" == "Darwin" ]; then
+    # MacOS/BSD version of base64 tool:
+    WRAP_OPT="--break=0"
+else
+    WRAP_OPT="--wrap=0"
+fi
+base64 "${WRAP_OPT}" "${TARGET}.tmp" > "${TARGET}.base64"
 
 # Cleanup our mess
-rm -vf "${TARGET}.tmp"
+rm -f "${TARGET}.tmp"
