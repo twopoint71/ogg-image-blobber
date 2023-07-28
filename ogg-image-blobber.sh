@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-if [ -z $1 ]; then
+if [ -z "${1}" ]; then
   echo "Please supply a jpg image file"
   exit 1
 fi
 
 DESCRIPTION="Cover Artwork"
-IMAGE_SOURCE=${1}
+IMAGE_SOURCE="${1}"
 IMAGE_MIME_TYPE="image/jpeg"
 TARGET="${IMAGE_SOURCE%.j*}"
 TYPE_ALBUM_COVER=3
@@ -22,8 +22,8 @@ print_binary() {
 }
 
 get_image_dimension() {
-  local DIMENSION=${1}
-  file ${IMAGE_SOURCE} | \
+  local DIMENSION="${1}"
+  file "${IMAGE_SOURCE}" | \
   awk -v dimension="${DIMENSION}" '
     BEGIN {
       dimensions["width"]=1;
@@ -52,8 +52,8 @@ image_height() {
 # sed filter removes leading spaces
 # - this for BSD-flavors of wc which insert leading spaces
 get_image_size() {
-  local FILE=${1}
-  echo -n "$(wc -c ${FILE} | sed 's/^[ ]*//g' | cut -d ' ' -f1)"
+  local FILE=${@}
+  echo -n "$(wc -c "${FILE}" | sed 's/^[ ]*//g' | cut -d ' ' -f1)"
 }
 
 add_to_target_binary() {
